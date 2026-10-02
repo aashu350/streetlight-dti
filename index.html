@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreetLight Care</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #eef3f7;
+    color: #1d2939;
+}
+
+header {
+    background: #123b5d;
+    color: white;
+    padding: 25px 18px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+header p {
+    font-size: 15px;
+}
+
+.container {
+    max-width: 700px;
+    margin: 25px auto;
+    padding: 0 15px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+}
+
+.card h2 {
+    color: #123b5d;
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 7px;
+    border: 1px solid #c5ccd3;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.problem-list {
+    margin-top: 12px;
+}
+
+.problem-list label {
+    font-weight: normal;
+    background: #f5f7f9;
+    padding: 11px;
+    border-radius: 8px;
+    margin-top: 7px;
+}
+
+.problem-list input {
+    width: auto;
+    margin-right: 8px;
+}
+
+button {
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    margin-top: 20px;
+    background: #123b5d;
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0b2941;
+}
+
+.message {
+    display: none;
+    margin-top: 15px;
+    padding: 14px;
+    border-radius: 8px;
+    background: #e1f5e8;
+    color: #176b3a;
+    font-weight: bold;
+}
+
+.report {
+    border-left: 5px solid #123b5d;
+    background: #f7f9fb;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 12px;
+}
+
+.report strong {
+    color: #123b5d;
+}
+
+.empty {
+    color: #667085;
+    text-align: center;
+    padding: 15px;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #667085;
+    font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>💡 StreetLight Care</h1>
+    <p>Smart Streetlight Fault Reporting System</p>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>Report a Streetlight Problem</h2>
+
+        <label for="pole">Streetlight / Pole Number</label>
+        <input
+            type="text"
+            id="pole"
+            placeholder="Example: SL-001"
+        >
+
+        <label for="location">Location</label>
+        <input
+            type="text"
+            id="location"
+            placeholder="Example: Main Road, Near Bus Stop"
+        >
+
+        <label>Problem</label>
+
+        <div class="problem-list">
+
+            <label>
+                <input type="checkbox" value="Light not working">
+                Light not working
+            </label>
+
+            <label>
+                <input type="checkbox" value="Light flickering">
+                Light flickering
+            </label>
+
+            <label>
+                <input type="checkbox" value="Pole damaged">
+                Pole damaged
+            </label>
+
+            <label>
+                <input type="checkbox" value="Wire damaged">
+                Wire damaged
+            </label>
+
+            <label>
+                <input type="checkbox" value="Other">
+                Other problem
+            </label>
+
+        </div>
+
+        <label for="description">Additional Details</label>
+
+        <textarea
+            id="description"
+            placeholder="Describe the problem..."
+        ></textarea>
+
+        <button onclick="submitReport()">
+            Submit Report
+        </button>
+
+        <div class="message" id="successMessage"></div>
+    </div>
+
+
+    <div class="card">
+        <h2>Reported Streetlights</h2>
+
+        <div id="reports">
+            <div class="empty">
+                No reports submitted yet.
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<footer>
+    DTI Project • Streetlight Fault Reporting System
+</footer>
+
+
+<script>
+
+function submitReport() {
+
+    const pole = document.getElementById("pole").value.trim();
+    const location = document.getElementById("location").value.trim();
+    const description = document.getElementById("description").value.trim();
+
+    const selectedProblems =
+        document.querySelectorAll(
+            '.problem-list input[type="checkbox"]:checked'
+        );
+
+    if (pole === "") {
+        alert("Please enter the streetlight / pole number.");
+        return;
+    }
+
+    if (location === "") {
+        alert("Please enter the location.");
+        return;
+    }
+
+    if (selectedProblems.length === 0) {
+        alert("Please select at least one problem.");
+        return;
+    }
+
+    let problems = [];
+
+    selectedProblems.forEach(function(item) {
+        problems.push(item.value);
+    });
+
+    const report = {
+        pole: pole,
+        location: location,
+        problems: problems.join(", "),
+        description: description,
+        status: "Pending"
+    };
+
+    saveReport(report);
+    displayReports();
+
+    document.getElementById("successMessage").style.display = "block";
+
+    document.getElementById("successMessage").textContent =
+        "✓ Report submitted successfully for " + pole;
+
+    document.getElementById("pole").value = "";
+    document.getElementById("location").value = "";
+    document.getElementById("description").value = "";
+
+    selectedProblems.forEach(function(item) {
+        item.checked = false;
+    });
+}
+
+
+function saveReport(report) {
+
+    let reports =
+        JSON.parse(localStorage.getItem("streetlightReports")) || [];
+
+    reports.push(report);
+
+    localStorage.setItem(
+        "streetlightReports",
+        JSON.stringify(reports)
+    );
+}
+
+
+function displayReports() {
+
+    const reports =
+        JSON.parse(localStorage.getItem("streetlightReports")) || [];
+
+    const container = document.getElementById("reports");
+
+    if (reports.length === 0) {
+        container.innerHTML =
+            '<div class="empty">No reports submitted yet.</div>';
+        return;
+    }
+
+    container.innerHTML = "";
+
+    reports.forEach(function(report, index) {
+
+        const div = document.createElement("div");
+
+        div.className = "report";
+
+        div.innerHTML = `
+            <strong>Streetlight:</strong> ${escapeHTML(report.pole)}<br>
+            <strong>Location:</strong> ${escapeHTML(report.location)}<br>
+            <strong>Problem:</strong> ${escapeHTML(report.problems)}<br>
+            <strong>Details:</strong> ${escapeHTML(report.description || "None")}<br>
+            <strong>Status:</strong> ${escapeHTML(report.status)}
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+
+function escapeHTML(text) {
+
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+displayReports();
+
+</script>
+
+</body>
+              </html>
